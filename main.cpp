@@ -1,0 +1,83 @@
+#include <iostream>
+#include <ncurses.h>
+
+using namespace std;
+
+void print_menu(WINDOW* menu_win, int highlight, const char* choices[], int n_choices) {
+    int x, y;
+    x = 2;
+    y = 2;
+    box(menu_win, 0, 0);  // Draw a box around the window
+    for (int i = 0; i < n_choices; ++i) {
+        if (highlight == i + 1) {  // Highlight the current choice
+            wattron(menu_win, A_REVERSE); // Turn on reverse coloring
+            mvwprintw(menu_win, y, x, "%s", choices[i]);
+            wattroff(menu_win, A_REVERSE); // Turn off reverse coloring
+        } else {
+            mvwprintw(menu_win, y, x, "%s", choices[i]);
+        }
+        ++y;
+    }
+    wrefresh(menu_win);  // Refresh the window to show the updates
+}
+
+int main() {
+    initscr();              // Initialize the ncurses mode
+    clear();                // Clear the screen
+    noecho();               // Disable echoing of characters
+    cbreak();               // Disable line buffering
+    curs_set(0);            // Hide the cursor
+
+    int startx, starty, width, height;
+    height = 10;
+    width = 30;
+    starty = (LINES - height) / 2;  // Centering the window
+    startx = (COLS - width) / 2;
+
+    WINDOW* menu_win = newwin(height, width, starty, startx);
+    keypad(menu_win, TRUE);  // Enable arrow keys in the window
+
+    const char* choices[] = {"Search", "Add Person", "Database Options", "Exit"};
+    int n_choices = sizeof(choices) / sizeof(choices[0]);
+    int highlight = 1;
+    int choice = 0;
+    int c;
+
+    while (true) {
+        print_menu(menu_win, highlight, choices, n_choices);
+        c = wgetch(menu_win);
+
+        switch (c) {
+            case KEY_UP:
+                if (highlight == 1)
+                    highlight = n_choices;
+                else
+                    --highlight;
+                break;
+            case KEY_DOWN:
+                if (highlight == n_choices)
+                    highlight = 1;
+                else
+                    ++highlight;
+                break;
+            case 10: // Enter key
+                choice = highlight;
+                break;
+            default:
+                break;
+        }
+        if (choice == 1) {
+            cout << "Search for a person" << endl;
+        }
+        if (choice == n_choices) // Exit option selected
+            break;
+    }
+
+    clrtoeol();
+    refresh();
+    endwin();
+
+    cout << "You chose option " << choice << endl;
+
+    return 0;
+}
