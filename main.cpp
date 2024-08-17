@@ -67,7 +67,9 @@ int main() {
                 break;
         }
         if (choice == 1) {
-            cout << "Search for a person" << endl;
+            WINDOW *search_win = newwin(10, 30, LINES/2, COLS/2);
+            keypad(search_win, true);
+            box(search_win, 0, 0);
         }
         if (choice == n_choices) // Exit option selected
             break;
