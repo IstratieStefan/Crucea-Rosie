@@ -22,14 +22,14 @@ void print_menu(WINDOW* menu_win, int highlight, const char* choices[], int n_ch
     wrefresh(menu_win);  // Refresh the window to show the updates
 }
 
-int main() {
+int menu() {
     initscr();              // Initialize the ncurses mode
     clear();                // Clear the screen
     cbreak();               // Disable line buffering
     curs_set(0);            // Hide the cursor
 
     // Logo
-    WINDOW *logo_win = newwin(6, COLS, 1, (COLS-58)/2);
+    WINDOW *logo_win = newwin(6, COLS, (LINES-6)/2-8, (COLS-58)/2);
     refresh();
     mvwprintw(logo_win, 1, 0, "   ____                             ____           _      \n");
     mvwprintw(logo_win, 2, 0, "  / ___|_ __ _   _  ___ ___  __ _  |  _ \\ ___  ___(_) ___ \n");
