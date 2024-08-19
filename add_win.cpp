@@ -7,6 +7,7 @@
 #include <cstring>
 #include <sqlite3.h>
 #include "add_win.h"
+#include "menu.h"
 
 
 using namespace std;
@@ -49,7 +50,7 @@ int add_win() {
     curs_set(2);
 
     //Display Window Fame
-    WINDOW *window_frame = newwin(22, COLS/2, (LINES-22)/2, (COLS/4) );
+    WINDOW *window_frame = newwin(24, COLS/2, (LINES-22)/2, (COLS/4) );
     refresh();
     keypad(window_frame, true);
     box(window_frame, 0, 0);
@@ -96,6 +97,11 @@ int add_win() {
     mvwprintw(minor_input, 1, 2, "Minor Family members:  ");
     wrefresh(minor_input);
 
+    //Displays buttons
+    mvwprintw(window_frame, (LINES-22)/2 - 22, ((COLS /2) - 18)/3+1, "[ Male ]");//8
+    wrefresh(window_frame);
+    mvwprintw(window_frame, (LINES-22)/2 - 22, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "[ Female ]");//10
+    wrefresh(window_frame);
     wrefresh(window_frame);
     //Init arrays
     const int MAX_LENGTH = 31;
@@ -107,6 +113,46 @@ int add_win() {
     mvwgetnstr(birth_input, 2, 2, birth, 4);
     mvwgetnstr(adults_input, 2, 2, adults, 1);
     mvwgetnstr(minor_input, 2, 2, kids, 1);
+
+    int c;
+    int selected = 0;     // 0 -> first button, 1 -> second button
+
+    noecho();
+    while (1) {
+        mvwprintw(window_frame, 5, ((COLS /2) - 18)/3+1, "        ");
+        mvwprintw(window_frame, 5, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "          ");
+        // Draw the first button
+        if (selected == 0) {
+            wattron(window_frame, A_REVERSE);  // Highlight first button
+        }
+        mvwprintw(window_frame, 5, ((COLS /2) - 18)/3+1, "[ Male ]");
+        wattroff(window_frame, A_REVERSE);
+
+        // Draw the second button
+        if (selected == 1) {
+            wattron(window_frame, A_REVERSE);  // Highlight second button
+        }
+        mvwprintw(window_frame, 5, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "[ Female ]");
+        wattroff(window_frame, A_REVERSE);
+
+        // Refresh the screen to show changes
+        wrefresh(window_frame);
+
+        // Get user input
+        c = wgetch(window_frame);
+        // Arrow key handling
+        if (c == KEY_LEFT) {
+            selected = 0;  // Select first button
+        } else if (c == KEY_RIGHT) {
+            selected = 1;  // Select second button
+        } else if (c == '\n') {  // Enter key
+            break;  // Next Adult starts
+        }
+    }
+    if (selected == 0)
+        cout << "M-";
+    else
+        cout << "F-";
 
     int birthYear = 0;
     birthYear = age(birth);
@@ -194,5 +240,6 @@ int add_win() {
     //Kids input
 
     endwin();
+    menu();
     return 0;
 }
