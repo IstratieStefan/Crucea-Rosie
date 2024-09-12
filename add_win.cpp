@@ -6,26 +6,14 @@
 #include <chrono>
 #include <cstring>
 #include <sqlite3.h>
+#include <iomanip>
 #include "add_win.h"
 #include "menu.h"
-
+#include "database.h"
+#include "errors.h"
+#include "chrono.h"
 
 using namespace std;
-
-
-
-// Get the current time
-auto now = std::chrono::system_clock::now();
-
-// Convert to time_t
-std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-
-// Convert to tm struct
-std::tm* localTime = std::localtime(&now_c);
-
-int year = 1900 + localTime->tm_year;
-
-
 
 int ageToBirthYear(char *s) {
     int age = atoi(s);
@@ -48,6 +36,7 @@ int add_win() {
     clear();                // Clear the screen
     cbreak();
     curs_set(2);
+    echo();
 
     //Display Window Fame
     WINDOW *window_frame = newwin(24, COLS/2, (LINES-22)/2, (COLS/4) );
@@ -98,14 +87,13 @@ int add_win() {
     wrefresh(minor_input);
 
     //Displays buttons
-    mvwprintw(window_frame, (LINES-22)/2 - 22, ((COLS /2) - 18)/3+1, "[ Male ]");//8
+    mvwprintw(window_frame, 22, ((COLS /2) - 18)/3+1, "[ Male ]");//8
     wrefresh(window_frame);
-    mvwprintw(window_frame, (LINES-22)/2 - 22, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "[ Female ]");//10
-    wrefresh(window_frame);
+    mvwprintw(window_frame, 22, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "[ Female ]");//10
     wrefresh(window_frame);
     //Init arrays
     const int MAX_LENGTH = 31;
-    char name[MAX_LENGTH], surname[MAX_LENGTH], birth[5], adults[2], kids[2], adultData[65], kidData[65];
+    char name[MAX_LENGTH], surname[MAX_LENGTH], birth[5], adults[2], kids[2], adultData[65], kidData[65], gender[7];
 
     //Get user input
     mvwgetnstr(surname_input, 2, 2, surname, MAX_LENGTH - 1);
@@ -118,21 +106,22 @@ int add_win() {
     int selected = 0;     // 0 -> first button, 1 -> second button
 
     noecho();
+    curs_set(0);
     while (1) {
-        mvwprintw(window_frame, 5, ((COLS /2) - 18)/3+1, "        ");
-        mvwprintw(window_frame, 5, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "          ");
+        mvwprintw(window_frame, 22, ((COLS /2) - 18)/3+1, "        ");
+        mvwprintw(window_frame, 22, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "          ");
         // Draw the first button
         if (selected == 0) {
             wattron(window_frame, A_REVERSE);  // Highlight first button
         }
-        mvwprintw(window_frame, 5, ((COLS /2) - 18)/3+1, "[ Male ]");
+        mvwprintw(window_frame, 22, ((COLS /2) - 18)/3+1, "[ Male ]");
         wattroff(window_frame, A_REVERSE);
 
         // Draw the second button
         if (selected == 1) {
             wattron(window_frame, A_REVERSE);  // Highlight second button
         }
-        mvwprintw(window_frame, 5, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "[ Female ]");
+        mvwprintw(window_frame, 22, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "[ Female ]");
         wattroff(window_frame, A_REVERSE);
 
         // Refresh the screen to show changes
@@ -150,18 +139,29 @@ int add_win() {
         }
     }
     if (selected == 0)
-        cout << "M-";
+        strcpy(gender, "Male");
     else
-        cout << "F-";
+        strcpy(gender, "Female");
 
+
+
+    // Input verification
+    name_verification(name);
+    surname_verification(surname);
+    age_verification_string(birth);
+
+    // Birth calculation
     int birthYear = 0;
     birthYear = age(birth);
+
+    age_verification_int(year - birthYear, 0);
 
     // Counts
     int adultsCount = atoi(adults);
     int kidsCount = atoi(kids);
     int familyCount = adultsCount + kidsCount;
 
+    char adult_info[12], kid_info[12];
     // Adult input
     for (int i = 0; i < adultsCount; i++) {
         clear();
@@ -239,6 +239,9 @@ int add_win() {
 
     //Kids input
 
+
+    register_person(db, surname, name, birthYear, gender, adultsCount, kidsCount, familyCount, adultData, kid_info, get_current_date());
+    //display_database_info(sqlite3* db);
     endwin();
     menu();
     return 0;

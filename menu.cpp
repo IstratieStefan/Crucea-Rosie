@@ -2,6 +2,10 @@
 #include <ncurses.h>
 #include "search_win.h"
 #include "add_win.h"
+#include "database_win.h"
+#include "statistics_menu.h"
+#include "database.h"
+
 using namespace std;
 
 void print_menu(WINDOW* menu_win, int highlight, const char* choices[], int n_choices) {
@@ -23,6 +27,7 @@ void print_menu(WINDOW* menu_win, int highlight, const char* choices[], int n_ch
 }
 
 int menu() {
+    sqlite3* db = get_db();
     initscr();              // Initialize the ncurses mode
     clear();                // Clear the screen
     cbreak();               // Disable line buffering
@@ -78,11 +83,13 @@ int menu() {
         }
         if (choice == 1) {
             search_win();
-        }
-        if (choice == 2) {
+        } if (choice == 2) {
             add_win();
-        }
-        if (choice == n_choices) // Exit option selected
+        } if (choice == 3) {
+            statistics_settings();
+        } if (choice == 4) {
+            database_settings();
+        } if (choice == n_choices) // Exit option selected
             break;
     }
 
@@ -90,7 +97,6 @@ int menu() {
     refresh();
     endwin();
 
-    cout << "You chose option " << choice << endl;
 
     return 0;
 }
