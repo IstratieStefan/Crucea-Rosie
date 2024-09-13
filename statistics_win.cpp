@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include "database.h"
+#include "statistics_menu.h"
 
 using namespace std;
 
@@ -106,9 +107,17 @@ void display_db_menu() {
     }
     sqlite3_finalize(stmt);
 
-    mvwprintw(win, LINES - 1, 1, "Press any key to exit...");
+    mvwprintw(win, LINES - 1, 1, "Press 'q' to exit...");
     wrefresh(win);
-    getch();
+    while(1){
+        if (getch() == 'q'){
+            endwin();
+            clear();
+            refresh();
+            statistics_settings();
+        }
+    }
+
     delwin(win);
 
     endwin(); // Cleanup ncurses

@@ -58,46 +58,6 @@ int register_person(sqlite3* db,
     return 0; // Return 0 on success
 }
 
-int search_person_by_name_and_surname(const char* name, const char* surname) {
-    sqlite3* db;
-    sqlite3_stmt* stmt;
-    int exit = sqlite3_open("database.db", &db);
-
-    if (exit != SQLITE_OK) {
-        cerr << "Error opening DB: " << sqlite3_errmsg(db) << '\n';
-        return -1;
-    }
-
-    const char* sql = "SELECT * FROM PERSON WHERE NAME = ? AND SURNAME = ?;";
-
-    exit = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-    if (exit != SQLITE_OK) {
-        cerr << "Error preparing statement: " << sqlite3_errmsg(db) << '\n';
-        sqlite3_close(db);
-        return -1;
-    }
-
-    sqlite3_bind_text(stmt, 1, name, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, surname, -1, SQLITE_STATIC);
-
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        for (int i = 0; i < sqlite3_column_count(stmt); i++) {
-            cout << sqlite3_column_name(stmt, i) << " = "
-                 << (sqlite3_column_text(stmt, i) ? reinterpret_cast<const char*>(sqlite3_column_text(stmt, i)) : "NULL")
-                 << endl;
-        }
-        cout << endl;
-    }
-
-    if (sqlite3_errmsg(db)[0] != '\0') {
-        cerr << "Error executing query: " << sqlite3_errmsg(db) << '\n';
-    }
-
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
-    return 0;
-}
-
 // Function to export database to a CSV file
 void export_to_csv(sqlite3* db, const char* filename) {
     ofstream csv_file(filename);
@@ -169,9 +129,6 @@ int database_init() {
     } else {
         cout << "Table created Successfully" << '\n';
     }
-
-    // Export to CSV file
-    export_to_csv(db, "person_data.csv");
 
     sqlite3_close(db);  // Close the database connection
     return 0;

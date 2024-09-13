@@ -59,7 +59,7 @@ int database_settings() {
         } if (choice == 2) {
             add_win();
         } if (choice == 4) {
-
+            export_to_csv(db, "Baza de date");
         } if (choice == n_choices) // Exit option selected
             menu();
     }

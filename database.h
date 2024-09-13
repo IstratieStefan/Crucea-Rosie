@@ -28,6 +28,8 @@ extern sqlite3* db;
 
 sqlite3* get_db();
 
+void export_to_csv(sqlite3* db, const char* filename);
+
 int search_person_by_name_and_surname(const char* name, const char* surname);
 
 void display_database_info(sqlite3* db);

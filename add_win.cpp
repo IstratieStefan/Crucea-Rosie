@@ -3,10 +3,10 @@
 //
 #include <iostream>
 #include <ncurses.h>
+#include <cstdio>
 #include <chrono>
 #include <cstring>
 #include <sqlite3.h>
-#include <iomanip>
 #include "add_win.h"
 #include "menu.h"
 #include "database.h"
@@ -93,7 +93,7 @@ int add_win() {
     wrefresh(window_frame);
     //Init arrays
     const int MAX_LENGTH = 31;
-    char name[MAX_LENGTH], surname[MAX_LENGTH], birth[5], adults[2], kids[2], adultData[65], kidData[65], gender[7];
+    char name[MAX_LENGTH], surname[MAX_LENGTH], birth[5], adults[2], kids[2], adultData[65] = {0}, kidData[65] = {0}, gender[7];
 
     //Get user input
     mvwgetnstr(surname_input, 2, 2, surname, MAX_LENGTH - 1);
@@ -138,6 +138,7 @@ int add_win() {
             break;  // Next Adult starts
         }
     }
+
     if (selected == 0)
         strcpy(gender, "Male");
     else
@@ -146,24 +147,32 @@ int add_win() {
 
 
     // Input verification
-    name_verification(name);
-    surname_verification(surname);
-    age_verification_string(birth);
+    strcpy(surname, surname_verification(surname));
+    strcpy(name, name_verification(name));
 
     // Birth calculation
     int birthYear = 0;
     birthYear = age(birth);
 
-    age_verification_int(year - birthYear, 0);
+    //age_verification_int(year - birthYear, 0);
 
     // Counts
     int adultsCount = atoi(adults);
     int kidsCount = atoi(kids);
     int familyCount = adultsCount + kidsCount;
 
-    char adult_info[12], kid_info[12];
+    if (strcmp(gender, "Male") == 0)
+        strcat(adultData, "M");
+    else
+        strcat(adultData, "F");
+    char age_year[5];
+    sprintf(age_year, "%d", birthYear);
+    strcat(adultData, age_year);
+    if (adultsCount > 1)
+        strcat(adultData, ",");
+
     // Adult input
-    for (int i = 0; i < adultsCount; i++) {
+    for (int i = 1; i < adultsCount; i++) {
         clear();
         curs_set(1);
         echo();
@@ -228,19 +237,96 @@ int add_win() {
             }
         }
         if (selected == 0)
-            cout << "M-";
+            strcat(adultData, "M");
         else
-            cout << "F-";
+            strcat(adultData, "F");
         int birthYearAdult = age(input);
         char x[5];
         sprintf(x, "%d", birthYearAdult);
         strcat(adultData,x);
+        if (i != adultsCount-1)
+            strcat(adultData,",");
     }
 
     //Kids input
 
+    for (int i = 0; i < kidsCount; i++) {
+        clear();
+        curs_set(1);
+        echo();
+        char input[5];
+        WINDOW * adult_window = newwin(7, COLS/2, (LINES-8)/2, (COLS/4));
+        refresh();
+        keypad(adult_window, true);
+        box(adult_window, 0, 0);
+        mvwprintw(adult_window, 0 ,(COLS/2-10)/2, "Child %d", i+1);
+        wrefresh(adult_window);
 
-    register_person(db, surname, name, birthYear, gender, adultsCount, kidsCount, familyCount, adultData, kid_info, get_current_date());
+        //Displays text box
+        WINDOW* age_input = newwin(4, COLS/2-4, (LINES-8)/2+1, (COLS/4)+2);
+        box(age_input, 0, 0);
+        refresh();
+        wrefresh(age_input);
+        mvwprintw(age_input, 1, 2, "Birth Year / Age: ");
+        wrefresh(age_input);
+
+        //Displays buttons
+        mvwprintw(adult_window, 5, ((COLS /2) - 18)/3+1, "[ Male ]");//8
+        wrefresh(adult_window);
+        mvwprintw(adult_window, 5, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "[ Female ]");//10
+        wrefresh(adult_window);
+
+        mvwgetnstr(age_input, 2, 2, input, MAX_LENGTH - 1);
+        wrefresh(adult_window);
+        curs_set(0);
+        int ch;
+        int selected = 0;     // 0 -> first button, 1 -> second button
+
+        noecho();
+        while (1) {
+            mvwprintw(adult_window, 5, ((COLS /2) - 18)/3+1, "        ");
+            mvwprintw(adult_window, 5, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "          ");
+            // Draw the first button
+            if (selected == 0) {
+                wattron(adult_window, A_REVERSE);  // Highlight first button
+            }
+            mvwprintw(adult_window, 5, ((COLS /2) - 18)/3+1, "[ Male ]");
+            wattroff(adult_window, A_REVERSE);
+
+            // Draw the second button
+            if (selected == 1) {
+                wattron(adult_window, A_REVERSE);  // Highlight second button
+            }
+            mvwprintw(adult_window, 5, ((COLS/2)-10)-((COLS /2) - 18)/3+1, "[ Female ]");
+            wattroff(adult_window, A_REVERSE);
+
+            // Refresh the screen to show changes
+            wrefresh(adult_window);
+
+            // Get user input
+            ch = wgetch(adult_window);
+            // Arrow key handling
+            if (ch == KEY_LEFT) {
+                selected = 0;  // Select first button
+            } else if (ch == KEY_RIGHT) {
+                selected = 1;  // Select second button
+            } else if (ch == '\n') {  // Enter key
+                break;  // Next Adult starts
+            }
+        }
+        if (selected == 0)
+            strcat(kidData, "M");
+        else
+            strcat(kidData, "F");
+        int birthYearAdult = age(input);
+        char x[5];
+        sprintf(x, "%d", birthYearAdult);
+        strcat(kidData,x);
+        if (i != kidsCount-1)
+            strcat(kidData,",");
+    }
+
+    register_person(db, surname, name, birthYear, gender, adultsCount, kidsCount, familyCount, adultData, kidData, get_current_date());
     //display_database_info(sqlite3* db);
     endwin();
     menu();

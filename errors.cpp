@@ -8,17 +8,22 @@ using namespace std;
 // code 1 - name
 // code 2 - surname
 // code 3 - birthyear/age
-// code 4 -
+// code 4 - birthyear/age too small or too big
+
+char* name_verification(char *s);
+char* surname_verification(char *s);
+char* age_verification_string(char *s, int n);
+int age_verification_int(int age, int n);
 
 
-void display_error_screen(int n) {
+char* display_error_screen(int n) {
     initscr();              // Initialize ncurses
     clear();                // Clear the screen
     cbreak();
     curs_set(2);
     echo();
 
-    char s[31];
+    char* s = new char[31];
 
     // Error_window size
     int x_size = 60;
@@ -27,7 +32,7 @@ void display_error_screen(int n) {
     // Display buttons below the name input box
     int button_y = 8; // Y-position of the buttons, adjusted to be below the name input box
     int back_button_x = ((COLS - x_size)/2) + 1;  // X-position of the Back button
-    int next_button_x = ((COLS - x_size)/2) + 7; // X-position of the Search button
+    int next_button_x = ((COLS - x_size)/2) + 8; // X-position of the Search button
 
     //Error Window
     WINDOW* error_win = newwin(y_size, x_size , (LINES -y_size)/2, (COLS - x_size)/2);
@@ -85,76 +90,129 @@ void display_error_screen(int n) {
     int ch;
     int selected = 0; // 0 -> first button, 1 -> second button
     noecho();
+    keypad(error_win, TRUE);  // Enable arrow key input for the window
     while (1) {
         // Clear previous button text before redrawing them
         mvwprintw(error_win, button_y, back_button_x, "        ");
         mvwprintw(error_win, button_y, next_button_x, "        ");
 
-        // Draw the first button at the correct position
+        // Highlight the correct button
         if (selected == 0) {
-            wattron(error_win, A_REVERSE);  // Highlight first button
+            wattron(error_win, A_REVERSE);  // Highlight first button (Back)
         }
         mvwprintw(error_win, button_y, back_button_x, "[ Back ]");
         wattroff(error_win, A_REVERSE);
 
-        // Draw the second button at the correct position
         if (selected == 1) {
-            wattron(error_win, A_REVERSE);  // Highlight second button
+            wattron(error_win, A_REVERSE);  // Highlight second button (Next)
         }
         mvwprintw(error_win, button_y, next_button_x, "[ Next ]");
         wattroff(error_win, A_REVERSE);
 
-        // Refresh the screen to show changes
+        // Refresh the screen to show button changes
         wrefresh(error_win);
+
 
         // Get user input
         ch = wgetch(error_win);
 
         // Arrow key handling to navigate between buttons
-        if (ch == KEY_LEFT) {
-            selected = 0;  // Select first button
-        } else if (ch == KEY_RIGHT) {
-            selected = 1;  // Select second button
+        if (ch == KEY_LEFT || ch == KEY_RIGHT) {
+            selected = 1 - selected;  // Toggle between 0 (Back) and 1 (Next)
         } else if (ch == '\n') {  // Enter key
             break;  // Exit the loop on Enter key press
         }
     }
 
-    // Check which button was selected
-    if (selected == 0)
-        menu(); // Back action
-    //else {
-
-    //}// Next action
-    endwin();
+    // Handle selected button action
+    if (selected == 0) {
+        menu();  // Call menu function for Back action
+    } else {
+        if (n == 1) {
+            name_verification(s);
+        } else if (n == 2) {
+            surname_verification(s);
+        } else if (n == 3) {
+            age_verification_string(s, n);
+        }
+        return s;
+    }
+    //endwin();
 }
 
-int name_verification(char *s) {
-    for (int i = 0 ; s[i] != '\0'; i++) {
+char* name_verification(char *s) {
+    char* a = new char[31];
+    bool error_found = false;
+
+    // Check if there are invalid characters in the name
+    for (int i = 0; s[i] != '\0'; i++) {
         if (strchr("0123456789 .,?/';{}[]<>!@#$%^&*", s[i])) {
-            display_error_screen(1);
+            strcpy(a, display_error_screen(1));  // Ask user to correct the name
+            error_found = true;
+            break;  // Exit the loop after finding an error
         }
     }
-    return 0;
+
+    if (!error_found) {
+        // No error found, copy the original name
+        strcpy(a, s);
+    }
+
+    return a;  // Return the corrected or original name
 }
 
-int surname_verification(char *s) {
+
+char* surname_verification(char *s) {
+    char* a = new char[31];
+    bool error_found = false;
+
+    // Check if there are invalid characters in the surname
     for (int i = 0 ; s[i] != '\0'; i++) {
         if (strchr("0123456789 .,?/';{}[]<>!@#$%^&*", s[i])) {
-            display_error_screen(2);
+            strcpy(a, display_error_screen(2));  // Ask user to correct the surname
+            error_found = true;
+            break;  // Exit the loop after finding an error
         }
     }
-    return 0;
+
+    if (!error_found) {
+        // No error found, copy the original surname
+        strcpy(a, s);
+    }
+
+    return a;  // Return the corrected or original surname
 }
 
-int age_verification_string(char *s) {
+char* age_verification_string(char *s, int n) {
+    char* a = new char[31];
+    bool error_found = false;
+
+    // Check if there are invalid characters in the age (string format)
     for (int i = 0 ; s[i] != '\0'; i++) {
         if (strchr(" .,?/';{}[]<>!@#$%^&*", s[i])) {
-            display_error_screen(3);
+            strcpy(a, display_error_screen(3));  // Ask user to correct the age
+            error_found = true;
+            break;  // Exit the loop after finding an error
         }
     }
-    return 0;
+
+    if (!error_found) {
+        // No error found, copy the original age string
+        strcpy(a, s);
+
+        // Convert the string to an integer and validate the age range
+        int age = atoi(a);  // Convert the string to an integer
+        if (age == 0 && strcmp(a, "0") != 0) {
+            strcpy(a, display_error_screen(3));  // Invalid input, ask for correction again
+        } else {
+            age_verification_int(age, n);  // Verify the integer age, assuming '0' means checking for minor (adjust n as needed)
+        }
+    }
+
+    return a;  // Return the corrected or original age string
 }
+
+
 
 int age_verification_int(int age, int n) {
     if (n == 0) {
