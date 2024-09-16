@@ -27,7 +27,7 @@ int statistics_settings() {
     WINDOW* menu_win = newwin(height, width, starty, startx);
     keypad(menu_win, TRUE);  // Enable arrow keys in the window
 
-    const char* choices[] = {"View Database", "Packages Today","Packages This Week", "Option A", "Option B", "Option C", "Option D", "Back"};
+    const char* choices[] = {"View Database", "Reports","Packages This Week", "Option A", "Option B", "Option C", "Option D", "Back"};
     int n_choices = sizeof(choices) / sizeof(choices[0]);
     int highlight = 1;
     int choice = 0;

@@ -34,4 +34,6 @@ int search_person_by_name_and_surname(const char* name, const char* surname);
 
 void display_database_info(sqlite3* db);
 
+void drop_all_tables(sqlite3* db);
+
 #endif //CRUCEA_ROSIE_DATABASE_H

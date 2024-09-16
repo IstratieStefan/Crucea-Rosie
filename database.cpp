@@ -5,6 +5,24 @@
 
 using namespace std;
 
+void drop_all_tables(sqlite3* db) {
+    const char* drop_table_sql = "DROP TABLE IF EXISTS PERSON;";
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, drop_table_sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        cerr << "Failed to prepare drop table statement: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        cerr << "Failed to execute drop table statement: " << sqlite3_errmsg(db) << endl;
+    }
+
+    sqlite3_finalize(stmt);
+    cout << "All tables have been dropped." << endl;
+}
+
 // Callback function for displaying data
 int callback(void* data, int argc, char** argv, char** azColName) {
     for (int i = 0; i < argc; i++) {
@@ -132,18 +150,6 @@ int database_init() {
 
     sqlite3_close(db);  // Close the database connection
     return 0;
-}
-
-// Function to display database information
-void display_database_info(sqlite3* db) {
-    const char* sql = "SELECT * FROM PERSON;";
-    char* messageError = nullptr;
-    int exit = sqlite3_exec(db, sql, callback, NULL, &messageError);
-
-    if (exit != SQLITE_OK) {
-        cerr << "Error SELECT: " << messageError << '\n';
-        sqlite3_free(messageError);
-    }
 }
 
 int database_main() {

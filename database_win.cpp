@@ -54,13 +54,15 @@ int database_settings() {
             default:
                 break;
         }
-        if (choice == 1) {
-
+        if (choice == 0) {
+            //database_init();
         } if (choice == 2) {
             add_win();
         } if (choice == 4) {
-            export_to_csv(db, "Baza de date");
-        } if (choice == n_choices) // Exit option selected
+            export_to_csv(db, "spreadsheet.csv");
+        } if (choice == 6) {
+            drop_all_tables(db);
+        }if (choice == n_choices) // Exit option selected
             menu();
     }
     // Cleanup ncurses
