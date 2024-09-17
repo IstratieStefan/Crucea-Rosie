@@ -4,6 +4,7 @@
 #include <iostream>
 #include "database.h"
 #include "statistics_menu.h"
+#include "menu.h"
 
 using namespace std;
 
@@ -130,7 +131,7 @@ void display_db_menu() {
         int ch = getch();
         switch (ch) {
             case 'q':
-                running = false;
+                menu();
                 break;
             case KEY_DOWN: // Scroll down
                 if (scroll_position + (LINES - 3) < data_count) {

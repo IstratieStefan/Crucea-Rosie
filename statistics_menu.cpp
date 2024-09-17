@@ -56,10 +56,11 @@ int statistics_settings() {
             default:
                 break;
         }
-        if (choice == 0) {
 
+        if (choice == 0) {
+            //display_db_menu();
         } if (choice == 1) {
-             display_db_menu();
+            display_db_menu();
         } if (choice == 2) {
 
         } if (choice == 4) {

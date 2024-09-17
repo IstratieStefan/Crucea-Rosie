@@ -31,8 +31,8 @@ char* display_error_screen(int n) {
 
     // Display buttons below the name input box
     int button_y = 8; // Y-position of the buttons, adjusted to be below the name input box
-    int back_button_x = ((COLS - x_size)/2) + 1;  // X-position of the Back button
-    int next_button_x = ((COLS - x_size)/2) + 8; // X-position of the Search button
+    int back_button_x = 15;  // X-position of the Back button
+    int next_button_x = 60-15-8; // X-position of the Search button
 
     //Error Window
     WINDOW* error_win = newwin(y_size, x_size , (LINES -y_size)/2, (COLS - x_size)/2);
@@ -91,6 +91,7 @@ char* display_error_screen(int n) {
     int selected = 0; // 0 -> first button, 1 -> second button
     noecho();
     keypad(error_win, TRUE);  // Enable arrow key input for the window
+    curs_set(0);  // Hide the cursor
     while (1) {
         // Clear previous button text before redrawing them
         mvwprintw(error_win, button_y, back_button_x, "        ");
@@ -137,7 +138,7 @@ char* display_error_screen(int n) {
         }
         return s;
     }
-    //endwin();
+    endwin();
 }
 
 char* name_verification(char *s) {
