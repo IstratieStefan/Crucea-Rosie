@@ -93,10 +93,10 @@ int search_results(int id) {
     clear();
     refresh();
     // Display Result Box
-    WINDOW *result_win = newwin(12, 30, (LINES-12)/2, (COLS-30)/2);
+    WINDOW *result_win = newwin(15, 60, (LINES-15)/2, (COLS-60)/2);
     refresh();
     box(result_win, 0, 0);
-    mvwprintw(result_win, 0, 7 + 1, "Search Results");
+    mvwprintw(result_win, 0, 30-7, "Search Results");
     wrefresh(result_win); // Refresh window to display title and box
 
     // Populate Data
@@ -114,11 +114,44 @@ int search_results(int id) {
     mvwprintw(result_win, 9, 2, "Minor Info: %s", human.minor_info);
     mvwprintw(result_win, 10, 2, "Timestamp: %s", human.timestamp);
     wrefresh(result_win);
-    while(1) {
-        if(getch() == 'q')
-            break;
+
+    int c;
+    int selected = 0;     // 0 -> first button, 1 -> second button
+
+    noecho();
+    curs_set(0);
+    while (1) {
+        mvwprintw(result_win, 13, 10, "        ");
+        mvwprintw(result_win, 13, 60-20, "          ");
+        // Draw the first button
+        if (selected == 0) {
+            wattron(result_win, A_REVERSE);  // Highlight first button
+        }
+        mvwprintw(result_win, 13, 10, "[ Male ]");
+        wattroff(result_win, A_REVERSE);
+
+        // Draw the second button
+        if (selected == 1) {
+            wattron(result_win, A_REVERSE);  // Highlight second button
+        }
+        mvwprintw(result_win, 13, 60-20, "[ Female ]");
+        wattroff(result_win, A_REVERSE);
+
+        // Refresh the screen to show changes
+        wrefresh(result_win);
+
+        // Get user input
+        c = wgetch(result_win);
+        // Arrow key handling
+        if (c == KEY_LEFT) {
+            selected = 0;  // Select first button
+        } else if (c == KEY_RIGHT) {
+            selected = 1;  // Select second button
+        } else if (c == '\n') {  // Enter key
+            break;  // Next Adult starts
+        }
     }
-    menu();
+
     endwin();
 
     return 0;

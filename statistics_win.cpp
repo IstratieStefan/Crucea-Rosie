@@ -97,6 +97,8 @@ void display_db_menu() {
             }
             x += column_widths[i] + 1;
         }
+        wrefresh(win);
+        refresh();
 
         // Display data based on the current scroll position
         y = 1; // Start from the second line
@@ -115,7 +117,12 @@ void display_db_menu() {
                 y++;
             }
         }
+        wrefresh(win);
+        refresh();
         sqlite3_finalize(stmt);
+
+        wrefresh(win);
+        refresh();
 
         mvwprintw(win, LINES - 1, 1, "Press 'q' to exit, 'UP' to scroll up, 'DOWN' to scroll down...");
         wrefresh(win);
